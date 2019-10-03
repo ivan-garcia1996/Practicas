@@ -2,6 +2,6 @@ package ud.prog3.pr00.simulador;
 
 public interface Evolucionable {
 		
-	void evoluciona( int dias );
+	void evoluciona(int dias);
 
 }
