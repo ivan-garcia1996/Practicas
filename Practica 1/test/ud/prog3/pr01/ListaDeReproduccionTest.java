@@ -41,5 +41,14 @@ public class ListaDeReproduccionTest {
 	 public void testGet() {
 	 assertEquals( FIC_TEST1, lr2.getFic(0) ); // El único dato es el fic-test1
 	 } 
+	 
+	 @Test 
+	 public void addCarpeta() {
+		 String carpetaTest = "test/res/";
+		 String filtroTest = "*Pentatonix*.mp4"; 
+		 ListaDeReproduccion lr = new ListaDeReproduccion();
+		 lr.add( carpetaTest, filtroTest );
+		 assertEquals( lr.size(), 3 );
+	} 
 
 }

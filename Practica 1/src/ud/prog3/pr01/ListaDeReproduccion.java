@@ -1,7 +1,14 @@
 package ud.prog3.pr01;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+
 import javax.swing.ListModel;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
@@ -16,7 +23,16 @@ import javax.swing.event.ListDataListener;
 public class ListaDeReproduccion implements ListModel<String> {
 	ArrayList<File> ficherosLista;     // ficheros de la lista de reproducci�n
 	int ficheroEnCurso = -1;           // Fichero seleccionado (-1 si no hay ninguno seleccionado)
-	
+	private static Logger logger = Logger.getLogger( ListaDeReproduccion.class.getName() ); 
+	private static final boolean ANYADIR_A_FIC_LOG = false; // poner true para no sobreescribir
+	static {
+	 try {
+	 logger.addHandler( new FileHandler(
+	 ListaDeReproduccion.class.getName()+".log.xml", ANYADIR_A_FIC_LOG ));
+	 } catch (SecurityException | IOException e) {
+	 logger.log( Level.SEVERE, "Error en creación fichero log" );
+	 }
+	} 
 	/** Devuelve uno de los ficheros de la lista
 	 * @param posi	Posici�n del fichero en la lista (de 0 a size()-1)
 	 * @return	Devuelve el fichero en esa posici�n
@@ -75,9 +91,33 @@ public class ListaDeReproduccion implements ListModel<String> {
 	 */
 	public int add(String carpetaFicheros, String filtroFicheros) {
 		// TODO: Codificar este m�todo de acuerdo a la pr�ctica (pasos 3 y sucesivos)
-		filtroFicheros = filtroFicheros.replaceAll( "\\.", "\\\\." );  // Pone el s�mbolo de la expresi�n regular \. donde figure un .
-		return 0;
+		int ficheros = 0;
+		if (carpetaFicheros != null) {
+			logger.log(Level.INFO, "Añadiendo ficheros con filtro " + filtroFicheros);
+			try {
+				filtroFicheros = filtroFicheros.replaceAll("\\.", "\\\\."); 															
+				filtroFicheros = filtroFicheros.replaceAll("\\*", ".*"); 															
+				logger.log(Level.INFO, "Valor del filtro deespues de los cambios: " + filtroFicheros);
+				Pattern p1 = Pattern.compile(filtroFicheros, Pattern.CASE_INSENSITIVE);
+				File fInic = new File(carpetaFicheros);
+				if (fInic.isDirectory()) {
+					for (File f : fInic.listFiles()) {
+						logger.log(Level.FINE, "Procesando fichero " + f.getName());
+						if (p1.matcher(f.getName()).matches()) {
+							logger.log(Level.INFO, "Fichero cumple, video añadido: " + f.getName());
+							add(f);
+							ficheros++;
+						}
+					}
+				}
+			} catch (PatternSyntaxException e) {
+				logger.log(Level.SEVERE, "Error en el string que se compila en el pattern", e);
+			}
+		}
+		logger.log(Level.INFO, "ficheros a�adidos: " + ficheros);
+		return ficheros;
 	}
+
 	
 	
 	//
