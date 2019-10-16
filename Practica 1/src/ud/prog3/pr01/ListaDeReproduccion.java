@@ -114,7 +114,7 @@ public class ListaDeReproduccion implements ListModel<String> {
 				logger.log(Level.SEVERE, "Error en el string que se compila en el pattern", e);
 			}
 		}
-		logger.log(Level.INFO, "ficheros a�adidos: " + ficheros);
+		logger.log(Level.INFO, "Ficheros añadidos: " + ficheros);
 		return ficheros;
 	}
 
