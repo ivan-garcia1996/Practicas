@@ -4,22 +4,18 @@ import java.awt.*;
 import java.awt.event.*;
 
 import javax.swing.*;
-
 import java.io.File;
 
-import uk.co.caprica.vlcj.binding.LibVlc;
-import uk.co.caprica.vlcj.component.EmbeddedMediaPlayerComponent;
-import uk.co.caprica.vlcj.discovery.NativeDiscovery;
-import uk.co.caprica.vlcj.player.MediaPlayer;
-import uk.co.caprica.vlcj.player.MediaPlayerEventAdapter;
-import uk.co.caprica.vlcj.player.embedded.FullScreenStrategy;
-import uk.co.caprica.vlcj.player.embedded.windows.Win32FullScreenStrategy;
+import uk.co.caprica.vlcj.factory.discovery.NativeDiscovery;
+import uk.co.caprica.vlcj.player.base.MediaPlayer;
+import uk.co.caprica.vlcj.player.base.MediaPlayerEventAdapter;
+import uk.co.caprica.vlcj.player.component.EmbeddedMediaPlayerComponent;
 
-/** Ventana principal de reproductor de vídeo
- * Utiliza la librería VLCj que debe estar instalada y configurada
+/** Ventana principal de reproductor de vï¿½deo
+ * Utiliza la librerï¿½a VLCj que debe estar instalada y configurada
  *     (http://www.capricasoftware.co.uk/projects/vlcj/index.html)
- * @author Andoni Eguíluz Morán
- * Facultad de Ingeniería - Universidad de Deusto
+ * @author Andoni Eguï¿½luz Morï¿½n
+ * Facultad de Ingenierï¿½a - Universidad de Deusto
  */
 public class VideoPlayer extends JFrame {
 	private static final long serialVersionUID = 1L;
@@ -30,18 +26,18 @@ public class VideoPlayer extends JFrame {
 	// Atributo de VLCj
 	private EmbeddedMediaPlayerComponent mediaPlayerComponent;
 	// Atributos manipulables de swing
-	private JList<String> lCanciones = null;  // Lista vertical de vídeos del player
-	private JProgressBar pbVideo = null;      // Barra de progreso del vídeo en curso
-	private JCheckBox cbAleatorio = null;     // Checkbox de reproducción aleatoria
-	private JLabel lMensaje = null;           // Label para mensaje de reproducción
+	private JList<String> lCanciones = null;  // Lista vertical de vï¿½deos del player
+	private JProgressBar pbVideo = null;      // Barra de progreso del vï¿½deo en curso
+	private JCheckBox cbAleatorio = null;     // Checkbox de reproducciï¿½n aleatoria
+	private JLabel lMensaje = null;           // Label para mensaje de reproducciï¿½n
 	// Datos asociados a la ventana
-	private ListaDeReproduccion listaRepVideos;  // Modelo para la lista de vídeos
+	private ListaDeReproduccion listaRepVideos;  // Modelo para la lista de vï¿½deos
 
 	public VideoPlayer() {
-		// Creación de datos asociados a la ventana (lista de reproducción)
+		// Creaciï¿½n de datos asociados a la ventana (lista de reproducciï¿½n)
 		listaRepVideos = new ListaDeReproduccion();
 		
-		// Creación de componentes/contenedores de swing
+		// Creaciï¿½n de componentes/contenedores de swing
 		lCanciones = new JList<String>( listaRepVideos );
 		pbVideo = new JProgressBar( 0, 10000 );
 		cbAleatorio = new JCheckBox("Rep. aleatoria");
@@ -54,16 +50,10 @@ public class VideoPlayer extends JFrame {
 		JButton bMaximizar = new JButton( new ImageIcon( VideoPlayer.class.getResource("img/Button Maximize.png")) );
 		
 		// Componente de VCLj
-        mediaPlayerComponent = new EmbeddedMediaPlayerComponent() {
-			private static final long serialVersionUID = 1L;
-			@Override
-            protected FullScreenStrategy onGetFullScreenStrategy() {
-                return new Win32FullScreenStrategy(VideoPlayer.this);
-            }
-        };
+        mediaPlayerComponent = new EmbeddedMediaPlayerComponent();
 
-		// Configuración de componentes/contenedores
-		setTitle("Video Player - Deusto Ingeniería");
+		// Configuraciï¿½n de componentes/contenedores
+		setTitle("Video Player - Deusto Ingenierï¿½a");
 		setLocationRelativeTo( null );  // Centra la ventana en la pantalla
 		setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
 		setSize( 800, 600 );
@@ -115,8 +105,8 @@ public class VideoPlayer extends JFrame {
 		bPausaPlay.addActionListener( new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (mediaPlayerComponent.getMediaPlayer().isPlayable()) {
-					if (mediaPlayerComponent.getMediaPlayer().isPlaying()) {
+				if (mediaPlayerComponent.mediaPlayer().status().isPlayable()) {
+					if (mediaPlayerComponent.mediaPlayer().status().isPlaying()) {
 						// TODO: hacer pausa
 					} else {
 						// TODO: hacer play
@@ -129,20 +119,20 @@ public class VideoPlayer extends JFrame {
 		bMaximizar.addActionListener( new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (mediaPlayerComponent.getMediaPlayer().isFullScreen())
-			        mediaPlayerComponent.getMediaPlayer().setFullScreen(false);
+				if (mediaPlayerComponent.mediaPlayer().fullScreen().isFullScreen())
+			        mediaPlayerComponent.mediaPlayer().fullScreen().set(false);
 				else
-					mediaPlayerComponent.getMediaPlayer().setFullScreen(true);
+					mediaPlayerComponent.mediaPlayer().fullScreen().set(true);
 			}
 		});
 		addWindowListener( new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
-				mediaPlayerComponent.getMediaPlayer().stop();
-				mediaPlayerComponent.getMediaPlayer().release();
+				mediaPlayerComponent.mediaPlayer().controls().stop();
+				mediaPlayerComponent.mediaPlayer().release();
 			}
 		});
-		mediaPlayerComponent.getMediaPlayer().addMediaPlayerEventListener( 
+		mediaPlayerComponent.mediaPlayer().events().addMediaPlayerEventListener( 
 			new MediaPlayerEventAdapter() {
 				@Override
 				public void finished(MediaPlayer mediaPlayer) {
@@ -158,29 +148,29 @@ public class VideoPlayer extends JFrame {
 			    @Override
 			    public void timeChanged(MediaPlayer mediaPlayer, long newTime) {
 					pbVideo.setValue( (int) (10000.0 * 
-							mediaPlayerComponent.getMediaPlayer().getTime() /
-							mediaPlayerComponent.getMediaPlayer().getLength()) );
+							mediaPlayerComponent.mediaPlayer().status().time() /
+							mediaPlayerComponent.mediaPlayer().status().length()) );
 					pbVideo.repaint();
 			    }
 		});
 	}
 
 	//
-	// Métodos sobre el player de vídeo
+	// Mï¿½todos sobre el player de vï¿½deo
 	//
 	
-	// Para la reproducción del vídeo en curso
+	// Para la reproducciï¿½n del vï¿½deo en curso
 	private void paraVideo() {
-		if (mediaPlayerComponent.getMediaPlayer()!=null)
-			mediaPlayerComponent.getMediaPlayer().stop();
+		if (mediaPlayerComponent.mediaPlayer()!=null)
+			mediaPlayerComponent.mediaPlayer().controls().stop();
 	}
 
-	// Empieza a reproducir el vídeo en curso de la lista de reproducción
+	// Empieza a reproducir el vï¿½deo en curso de la lista de reproducciï¿½n
 	private void lanzaVideo() {
-		if (mediaPlayerComponent.getMediaPlayer()!=null &&
+		if (mediaPlayerComponent.mediaPlayer()!=null &&
 			listaRepVideos.getFicSeleccionado()!=-1) {
 			File ficVideo = listaRepVideos.getFic(listaRepVideos.getFicSeleccionado());
-			mediaPlayerComponent.getMediaPlayer().playMedia( 
+			mediaPlayerComponent.mediaPlayer().media().play( 
 				ficVideo.getAbsolutePath() );
 			lCanciones.setSelectedIndex( listaRepVideos.getFicSeleccionado() );
 		} else {
@@ -188,7 +178,7 @@ public class VideoPlayer extends JFrame {
 		}
 	}
 	
-	// Pide interactivamente una carpeta para coger vídeos
+	// Pide interactivamente una carpeta para coger vï¿½deos
 	// (null si no se selecciona)
 	private static File pedirCarpeta() {
 		// TODO: Pedir la carpeta usando JFileChooser
@@ -199,19 +189,19 @@ public class VideoPlayer extends JFrame {
 		private static String path;
 	/** Ejecuta una ventana de VideoPlayer.
 	 * El path de VLC debe estar en la variable de entorno "vlc".
-	 * Comprobar que la versión de 32/64 bits de Java y de VLC es compatible.
+	 * Comprobar que la versiï¿½n de 32/64 bits de Java y de VLC es compatible.
 	 * @param args	Un array de dos strings. El primero es el nombre (con comodines) de los ficheros,
 	 * 				el segundo el path donde encontrarlos.  Si no se suministran, se piden de forma interactiva. 
 	 */
 	public static void main(String[] args) {
-		// Para probar carga interactiva descomentar o comentar la línea siguiente:
+		// Para probar carga interactiva descomentar o comentar la lï¿½nea siguiente:
 		args = new String[] { "*Pentatonix*.mp4", "test/res/" };
 		if (args.length < 2) {
-			// No hay argumentos: selección manual
+			// No hay argumentos: selecciï¿½n manual
 			File fPath = pedirCarpeta();
 			if (fPath==null) return;
 			path = fPath.getAbsolutePath();
-			// TODO : Petición manual de ficheros con comodines (showInputDialog)
+			// TODO : Peticiï¿½n manual de ficheros con comodines (showInputDialog)
 			// ficheros = ???
 		} else {
 			ficheros = args[0];
@@ -221,13 +211,13 @@ public class VideoPlayer extends JFrame {
 		// Inicializar VLC.
 		// Probar con el buscador nativo...
 		boolean found = new NativeDiscovery().discover();
-    	// System.out.println( LibVlc.INSTANCE.libvlc_get_version() );  // Visualiza versión de VLC encontrada
+    	System.out.println( LibVlc.INSTANCE.libvlc_get_version() );  // Visualiza versiï¿½n de VLC encontrada
     	// Si no se encuentra probar otras opciones:
     	if (!found) {
 			// Buscar vlc como variable de entorno
 			String vlcPath = System.getenv().get( "vlc" );
 			if (vlcPath==null) {  // Poner VLC a mano
-	        	System.setProperty("jna.library.path", "c:\\Program Files\\videolan\\VLC");
+	        	System.setProperty("jna.library.path", "C:\\Program Files\\VideoLAN\\VLC");
 			} else {  // Poner VLC desde la variable de entorno
 				System.setProperty( "jna.library.path", vlcPath );
 			}
@@ -238,7 +228,7 @@ public class VideoPlayer extends JFrame {
 			@Override
 			public void run() {
 				miVentana = new VideoPlayer();
-				// Descomentar estas dos líneas para ver un vídeo de ejemplo
+				// Descomentar estas dos lï¿½neas para ver un vï¿½deo de ejemplo
 				// miVentana.listaRepVideos.ficherosLista = new ArrayList<File>();
 				// miVentana.listaRepVideos.ficherosLista.add( new File("test/res/[Official Video] Daft Punk - Pentatonix.mp4") );				
 				miVentana.setVisible( true );

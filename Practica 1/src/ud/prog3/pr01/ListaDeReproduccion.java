@@ -3,6 +3,7 @@ package ud.prog3.pr01;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,10 +22,12 @@ import javax.swing.event.ListDataListener;
  * de los elementos en la lista, borrar elementos y a�adir nuevos.
  */
 public class ListaDeReproduccion implements ListModel<String> {
-	ArrayList<File> ficherosLista;     // ficheros de la lista de reproducci�n
+	ArrayList<File> ficherosLista; // ficheros de la lista de reproducci�n
+	ArrayList<Boolean> ficherosErroneos;
 	int ficheroEnCurso = -1;           // Fichero seleccionado (-1 si no hay ninguno seleccionado)
 	private static Logger logger = Logger.getLogger( ListaDeReproduccion.class.getName() ); 
 	private static final boolean ANYADIR_A_FIC_LOG = false; // poner true para no sobreescribir
+	private static Random r = new Random();
 	static {
 	 try {
 	 logger.addHandler( new FileHandler(
@@ -42,6 +45,7 @@ public class ListaDeReproduccion implements ListModel<String> {
 	//Constructor que inicializa la lista vacia.
 	public ListaDeReproduccion() {
 		ficherosLista=new ArrayList<File>();
+		ficherosErroneos=new ArrayList<Boolean>();
 	}
 	
 	//intercambia las dos posiciones (no hace nada si cualquiera de las posiciones es errónea).
@@ -62,6 +66,8 @@ public class ListaDeReproduccion implements ListModel<String> {
 	//Añade un fichero al final de la lista.
 	public void add( File f ) {
 		ficherosLista.add(f);
+		ficherosErroneos.add(false);
+		avisarAnyadido(ficherosLista.size() - 1);
 	}
 	//Elimina un fichero de la lista, dada su posición.
 	public void removeFic( int posi ) {
@@ -169,6 +175,24 @@ public class ListaDeReproduccion implements ListModel<String> {
 		}
 		return true;
 	}
+	
+	/**
+	 * Selecciona un fichero aleatorio de la lista de reproducci�n.
+	 * @return true si la selección es correcta, false si hay error y no se puede seleccionar
+	 */
+	public boolean irARandom() {
+		if (ficherosLista.size() == 0) {
+			ficheroEnCurso = -1;
+			return false;
+		}
+		for (int i = 0; i < ficherosLista.size(); i++) { 
+			ficheroEnCurso = r.nextInt(ficherosLista.size());
+			if (!ficherosErroneos.get(ficheroEnCurso))
+				return true;
+		}
+		return false;
+	}
+
 
 	/** Devuelve el fichero seleccionado de la lista
 	 * @return	Posici�n del fichero seleccionado en la lista de reproducci�n (0 a n-1), -1 si no lo hay
